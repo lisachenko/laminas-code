@@ -24,14 +24,12 @@ abstract class AbstractGenerator implements GeneratorInterface
      */
     public const LINE_FEED = "\n";
 
-    /** @var bool */
-    protected $isSourceDirty = true;
+    protected bool $isSourceDirty = true;
 
-    /** @var int|string 4 spaces by default */
-    protected $indentation = '    ';
+    /** @var string 4 spaces by default */
+    protected string $indentation = '    ';
 
-    /** @var string */
-    protected $sourceContent;
+    protected string $sourceContent = '';
 
     /**
      * @param  array $options

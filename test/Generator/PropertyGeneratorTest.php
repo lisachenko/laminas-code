@@ -173,7 +173,9 @@ EOS;
         $cgProp = PropertyGenerator::fromReflection($reflProp);
 
         self::assertEquals('_bazProperty', $cgProp->getName());
-        self::assertEquals([true, false, true], $cgProp->getDefaultValue()->getValue());
+        $bazPropertyValue = $cgProp->getDefaultValue();
+        self::assertNotNull($bazPropertyValue);
+        self::assertEquals([true, false, true], $bazPropertyValue->getValue());
         self::assertEquals('private', $cgProp->getVisibility());
 
         $reflProp = $reflectionClass->getProperty('_bazStaticProperty');
@@ -182,7 +184,9 @@ EOS;
         $cgProp = PropertyGenerator::fromReflection($reflProp);
 
         self::assertEquals('_bazStaticProperty', $cgProp->getName());
-        self::assertEquals(TestAsset\TestClassWithManyProperties::FOO, $cgProp->getDefaultValue()->getValue());
+        $bazStaticValue = $cgProp->getDefaultValue();
+        self::assertNotNull($bazStaticValue);
+        self::assertEquals(TestAsset\TestClassWithManyProperties::FOO, $bazStaticValue->getValue());
         self::assertTrue($cgProp->isStatic());
         self::assertEquals('private', $cgProp->getVisibility());
     }
@@ -296,8 +300,10 @@ EOS;
         $property = new PropertyGenerator();
         $property->setDefaultValue($value, $type);
 
-        self::assertEquals($type, $property->getDefaultValue()->getType());
-        self::assertEquals($value, $property->getDefaultValue()->getValue());
+        $valueGenerator = $property->getDefaultValue();
+        self::assertNotNull($valueGenerator);
+        self::assertEquals($type, $valueGenerator->getType());
+        self::assertEquals($value, $valueGenerator->getValue());
     }
 
     public function testOmitType()

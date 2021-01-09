@@ -8,6 +8,7 @@
 
 namespace LaminasTest\Code\Generator;
 
+use DateTime;
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\Exception\ExceptionInterface;
 use Laminas\Code\Generator\Exception\InvalidArgumentException;
@@ -16,6 +17,8 @@ use Laminas\Code\Generator\PropertyGenerator;
 use Laminas\Code\Generator\TraitGenerator;
 use Laminas\Code\Reflection\ClassReflection;
 use PHPUnit\Framework\TestCase;
+use Serializable;
+use Throwable;
 
 use function current;
 
@@ -65,7 +68,7 @@ class TraitGeneratorTest extends TestCase
     public function testImplementedInterfacesAccessors()
     {
         $classGenerator = new TraitGenerator();
-        $classGenerator->setImplementedInterfaces(['Class1', 'Class2']);
+        $classGenerator->setImplementedInterfaces([Serializable::class, Throwable::class]);
         self::assertCount(0, $classGenerator->getImplementedInterfaces());
     }
 
@@ -271,7 +274,7 @@ EOS;
         $classGeneratorClass = new TraitGenerator();
         $classGeneratorClass
             ->setName('MyClass')
-            ->setExtendedClass('');
+            ->setExtendedClass(null);
 
         $expected = <<<CODE
 trait MyClass
@@ -290,7 +293,7 @@ CODE;
         $classGeneratorClass = new TraitGenerator();
         $classGeneratorClass
             ->setName('MyClass')
-            ->setExtendedClass('ParentClass');
+            ->setExtendedClass(DateTime::class);
 
         $expected = <<<CODE
 trait MyClass

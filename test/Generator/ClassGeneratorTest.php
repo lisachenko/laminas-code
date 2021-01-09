@@ -20,7 +20,9 @@ use Laminas\Code\Reflection\ClassReflection;
 use LaminasTest\Code\TestAsset\FooClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use Serializable;
 use stdClass;
+use Throwable;
 
 use function current;
 use function fclose;
@@ -97,21 +99,21 @@ class ClassGeneratorTest extends TestCase
     public function testHasImplementedInterface()
     {
         $classGenerator = new ClassGenerator();
-        $classGenerator->setImplementedInterfaces(['Class1', 'Class2']);
+        $classGenerator->setImplementedInterfaces([Throwable::class, Serializable::class]);
 
-        self::assertTrue($classGenerator->hasImplementedInterface('Class1'));
+        self::assertTrue($classGenerator->hasImplementedInterface(Throwable::class));
     }
 
     public function testRemoveImplementedInterface()
     {
         $classGenerator = new ClassGenerator();
-        $classGenerator->setImplementedInterfaces(['Class1', 'Class2']);
+        $classGenerator->setImplementedInterfaces([Throwable::class, Serializable::class]);
 
-        self::assertTrue($classGenerator->hasImplementedInterface('Class1'));
+        self::assertTrue($classGenerator->hasImplementedInterface(Throwable::class));
 
-        $classGenerator->removeImplementedInterface('Class1');
-        self::assertFalse($classGenerator->hasImplementedInterface('Class1'));
-        self::assertTrue($classGenerator->hasImplementedInterface('Class2'));
+        $classGenerator->removeImplementedInterface(Throwable::class);
+        self::assertFalse($classGenerator->hasImplementedInterface(Throwable::class));
+        self::assertTrue($classGenerator->hasImplementedInterface(Serializable::class));
     }
 
     public function testPropertyAccessors()
@@ -596,7 +598,10 @@ CODE;
 
         self::assertInstanceOf(PropertyGenerator::class, $constant);
         self::assertTrue($constant->isConst());
-        self::assertEquals('value', $constant->getDefaultValue()->getValue());
+
+        $defaultValue = $constant->getDefaultValue();
+        self::assertNotNull($defaultValue);
+        self::assertEquals('value', $defaultValue->getValue());
     }
 
     /**
@@ -612,8 +617,13 @@ CODE;
         ]);
 
         self::assertCount(2, $classGenerator->getConstants());
-        self::assertEquals('value1', $classGenerator->getConstant('x')->getDefaultValue()->getValue());
-        self::assertEquals('value2', $classGenerator->getConstant('y')->getDefaultValue()->getValue());
+        $valueX = $classGenerator->getConstant('x')->getDefaultValue();
+        self::assertNotNull($valueX);
+        self::assertEquals('value1', $valueX->getValue());
+
+        $valueY = $classGenerator->getConstant('y')->getDefaultValue();
+        self::assertNotNull($valueY);
+        self::assertEquals('value2', $valueY->getValue());
     }
 
     /**
@@ -629,8 +639,14 @@ CODE;
         ]);
 
         self::assertCount(2, $classGenerator->getConstants());
-        self::assertEquals('value1', $classGenerator->getConstant('x')->getDefaultValue()->getValue());
-        self::assertEquals('value2', $classGenerator->getConstant('y')->getDefaultValue()->getValue());
+
+        $valueX = $classGenerator->getConstant('x')->getDefaultValue();
+        self::assertNotNull($valueX);
+        self::assertEquals('value1', $valueX->getValue());
+
+        $valueY = $classGenerator->getConstant('y')->getDefaultValue();
+        self::assertNotNull($valueY);
+        self::assertEquals('value2', $valueY->getValue());
     }
 
     /**
@@ -664,13 +680,33 @@ CODE;
         $classGenerator->addConstant('f', ['v1' => ['v2' => 'v3']]);
         $classGenerator->addConstant('g', null);
 
-        self::assertEquals('v', $classGenerator->getConstant('a')->getDefaultValue()->getValue());
-        self::assertEquals(123, $classGenerator->getConstant('b')->getDefaultValue()->getValue());
-        self::assertEquals(123.456, $classGenerator->getConstant('c')->getDefaultValue()->getValue());
-        self::assertEquals([], $classGenerator->getConstant('d')->getDefaultValue()->getValue());
-        self::assertEquals(['v1' => 'v2'], $classGenerator->getConstant('e')->getDefaultValue()->getValue());
-        self::assertEquals(['v1' => ['v2' => 'v3']], $classGenerator->getConstant('f')->getDefaultValue()->getValue());
-        self::assertEquals(null, $classGenerator->getConstant('g')->getDefaultValue()->getValue());
+        $valueA = $classGenerator->getConstant('a')->getDefaultValue();
+        self::assertNotNull($valueA);
+        self::assertEquals('v', $valueA->getValue());
+
+        $valueB = $classGenerator->getConstant('b')->getDefaultValue();
+        self::assertNotNull($valueB);
+        self::assertEquals(123, $valueB->getValue());
+
+        $valueC = $classGenerator->getConstant('c')->getDefaultValue();
+        self::assertNotNull($valueC);
+        self::assertEquals(123.456, $valueC->getValue());
+
+        $valueD = $classGenerator->getConstant('d')->getDefaultValue();
+        self::assertNotNull($valueD);
+        self::assertEquals([], $valueD->getValue());
+
+        $valueE = $classGenerator->getConstant('e')->getDefaultValue();
+        self::assertNotNull($valueE);
+        self::assertEquals(['v1' => 'v2'], $valueE->getValue());
+
+        $valueF = $classGenerator->getConstant('f')->getDefaultValue();
+        self::assertNotNull($valueF);
+        self::assertEquals(['v1' => ['v2' => 'v3']], $valueF->getValue());
+
+        $valueG = $classGenerator->getConstant('g')->getDefaultValue();
+        self::assertNotNull($valueG);
+        self::assertEquals(null, $valueG->getValue());
     }
 
     public function testAddConstantRejectsObjectConstantValue()
@@ -714,7 +750,7 @@ CODE;
         $classGenerator = new ClassGenerator();
         $classGenerator->addConstant('x', 'value1');
 
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $classGenerator->addConstant('x', 'value1');
     }
 
@@ -737,7 +773,9 @@ CODE;
 
         $classGenerator->addProperty('x', 'value1', PropertyGenerator::FLAG_CONSTANT);
 
-        self::assertEquals('value1', $classGenerator->getConstant('x')->getDefaultValue()->getValue());
+        $valueX = $classGenerator->getConstant('x')->getDefaultValue();
+        self::assertNotNull($valueX);
+        self::assertEquals('value1', $valueX->getValue());
     }
 
     /**
@@ -754,8 +792,13 @@ CODE;
         $classGenerator->addProperties($constants);
 
         self::assertCount(2, $classGenerator->getConstants());
-        self::assertEquals('value1', $classGenerator->getConstant('x')->getDefaultValue()->getValue());
-        self::assertEquals('value2', $classGenerator->getConstant('y')->getDefaultValue()->getValue());
+        $valueX = $classGenerator->getConstant('x')->getDefaultValue();
+        self::assertNotNull($valueX);
+        self::assertEquals('value1', $valueX->getValue());
+
+        $valueY = $classGenerator->getConstant('y')->getDefaultValue();
+        self::assertNotNull($valueY);
+        self::assertEquals('value2', $valueY->getValue());
     }
 
     /**
@@ -767,7 +810,9 @@ CODE;
         $classGenerator = ClassGenerator::fromReflection($reflector);
         $constant       = $classGenerator->getConstant('FOO');
 
-        self::assertEquals('foo', $constant->getDefaultValue()->getValue());
+        $constantValue = $constant->getDefaultValue();
+        self::assertNotNull($constantValue);
+        self::assertEquals('foo', $constantValue->getValue());
     }
 
     /**
@@ -1170,7 +1215,7 @@ EOS;
         $classGenerator = new ClassGenerator();
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
-        $classGenerator->setExtendedClass('DateTime');
+        $classGenerator->setExtendedClass(DateTime::class);
         self::assertStringContainsString('class ClassName extends \DateTime', $classGenerator->generate());
     }
 
@@ -1181,7 +1226,7 @@ EOS;
     {
         $classGenerator = new ClassGenerator();
         $classGenerator->setName('ClassName');
-        $classGenerator->setExtendedClass('DateTime');
+        $classGenerator->setExtendedClass(DateTime::class);
         self::assertStringContainsString('class ClassName extends DateTime', $classGenerator->generate());
     }
 
@@ -1207,8 +1252,10 @@ EOS;
         $classGenerator = new ClassGenerator();
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
-        $classGenerator->addUse('Foo\\Bar', 'BarAlias');
-        $classGenerator->setExtendedClass('BarAlias');
+        /** @psalm-var class-string $useAlias */
+        $useAlias = 'BarAlias';
+        $classGenerator->addUse('Foo\\Bar', $useAlias);
+        $classGenerator->setExtendedClass($useAlias);
         $generated = $classGenerator->generate();
         self::assertStringContainsString('class ClassName extends BarAlias', $generated);
     }
@@ -1219,7 +1266,9 @@ EOS;
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
         $classGenerator->addUse('Foo\\Bar', 'BarAlias');
-        $classGenerator->setExtendedClass('BarAlias\\FooBar');
+        /** @psalm-var class-string $extendedClass */
+        $extendedClass = 'BarAlias\\FooBar';
+        $classGenerator->setExtendedClass($extendedClass);
         $generated = $classGenerator->generate();
         self::assertStringContainsString('class ClassName extends BarAlias\\FooBar', $generated);
     }
@@ -1230,7 +1279,10 @@ EOS;
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
         $classGenerator->addUse('Foo\\Bar', 'BarAlias');
-        $classGenerator->setExtendedClass('Foo\\Bar');
+
+        /** @psalm-var class-string $extendedClass */
+        $extendedClass = 'Foo\\Bar';
+        $classGenerator->setExtendedClass($extendedClass);
         $generated = $classGenerator->generate();
         self::assertStringContainsString('class ClassName extends BarAlias', $generated);
     }
@@ -1241,7 +1293,10 @@ EOS;
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
         $classGenerator->addUse('Foo\\Bar', 'BarAlias');
-        $classGenerator->setExtendedClass('Foo\\Bar\\FooBar');
+
+        /** @psalm-var class-string */
+        $extendedClass = 'Foo\\Bar\\FooBar';
+        $classGenerator->setExtendedClass($extendedClass);
         $generated = $classGenerator->generate();
         self::assertStringContainsString('class ClassName extends BarAlias\\FooBar', $generated);
     }
@@ -1252,11 +1307,14 @@ EOS;
         $classGenerator->setName('ClassName');
         $classGenerator->setNamespaceName('SomeNamespace');
         $classGenerator->addUse(GeneratorInterface::class);
-        $classGenerator->setImplementedInterfaces([
+
+        /** @psalm-var array<class-string> */
+        $implementedInterfaces = [
             'SomeNamespace\ClassInterface',
             GeneratorInterface::class,
             'Iteratable',
-        ]);
+        ];
+        $classGenerator->setImplementedInterfaces($implementedInterfaces);
 
         $expected = 'class ClassName implements ClassInterface, GeneratorInterface, \Iteratable';
         self::assertStringContainsString($expected, $classGenerator->generate());

@@ -9,6 +9,7 @@
 namespace LaminasTest\Code\Generator;
 
 use Countable;
+use DateTime;
 use IteratorAggregate;
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\Exception\InvalidArgumentException;
@@ -36,7 +37,7 @@ class InterfaceGeneratorTest extends TestCase
     public function testExtendedClassAccessors()
     {
         $classGenerator = new InterfaceGenerator();
-        $classGenerator->setExtendedClass('ExtendedClass');
+        $classGenerator->setExtendedClass(DateTime::class);
 
         self::assertNull($classGenerator->getExtendedClass());
     }
@@ -103,7 +104,7 @@ EOS;
         $classGeneratorClass = new InterfaceGenerator();
         $classGeneratorClass
             ->setName('MyInterface')
-            ->setExtendedClass('');
+            ->setExtendedClass(null);
 
         $expected = <<<CODE
 interface MyInterface
@@ -119,7 +120,7 @@ CODE;
         $classGeneratorClass = new InterfaceGenerator();
         $classGeneratorClass
             ->setName('MyInterface')
-            ->setExtendedClass('MyInterface');
+            ->setExtendedClass(DateTime::class);
 
         $expected = <<<CODE
 interface MyInterface

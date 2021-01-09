@@ -133,8 +133,9 @@ class ParameterGeneratorTest extends TestCase
         self::assertCount(2, $params);
 
         $firstParameter = ParameterGenerator::fromReflection($params[0]);
-        self::assertInstanceOf(ValueGenerator::class, $firstParameter->getDefaultValue());
-        self::assertNull($firstParameter->getDefaultValue()->getSourceContent());
+        $valueGenerator = $firstParameter->getDefaultValue();
+        self::assertInstanceOf(ValueGenerator::class, $valueGenerator);
+        self::assertSame('', $valueGenerator->getSourceContent());
     }
 
     public function testFromReflectionGetArrayHint()

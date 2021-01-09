@@ -360,6 +360,7 @@ EOS;
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('setDeclares is expecting an array of Laminas\\Code\\DeclareStatement objects');
+        /** @psalm-suppress InvalidArgument */
         $generator->setDeclares([new stdClass()]);
     }
 
